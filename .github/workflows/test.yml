@@ -1,0 +1,22 @@
+name: Test
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Run tests
+      run: bundle exec rake
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: test-results
