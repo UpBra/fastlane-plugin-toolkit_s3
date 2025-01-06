@@ -17,30 +17,30 @@ module Fastlane
 		class S3FindAction < Action
 
 			module Keys
-				AccessKey = :access_key
-				AccessSecret = :access_secret
-				Region = :region
-				Bucket = :bucket
-				Prefix = :prefix
-				Filename = :filename
-				Fail = :fail
+				ACCESS_KEY = :ACCESS_KEY
+				ACCESS_SECRET = :ACCESS_SECRET
+				REGION = :REGION
+				BUCKET = :BUCKET
+				PREFIX = :PREFIX
+				FILENAME = :FILENAME
+				FAIL = :FAIL
 			end
 
 			def self.run(params)
 				require 'aws-sdk-s3'
 
-				access_key = require_property(params[Keys::AccessKey], 'Missing property access key')
-				access_secret = require_property(params[Keys::AccessSecret], 'Missing property access secret')
-				region = require_property(params[Keys::Region], 'Missing property region')
-				bucket = require_property(params[Keys::Bucket], 'Missing property bucket')
-				prefix = require_property(params[Keys::Prefix], 'Missing property prefix')
-				filename = require_property(params[Keys::Filename], 'Missing property filename')
-				fail = params[Keys::Fail]
+				access_key = require_property(params[Keys::ACCESS_KEY], 'Missing property :access_key')
+				access_secret = require_property(params[Keys::ACCESS_SECRET], 'Missing property :access_secret')
+				region = require_property(params[Keys::REGION], 'Missing property :region')
+				bucket = require_property(params[Keys::BUCKET], 'Missing property :bucket')
+				prefix = require_property(params[Keys::PREFIX], 'Missing property :prefix')
+				filename = require_property(params[Keys::FILENAME], 'Missing property :filename')
+				fail = params[Keys::FAIL]
 
 				FastlaneCore::PrintTable.print_values(
 					config: params,
 					title: "Summary for S3 Find",
-					mask_keys: [Keys::AccessKey, Keys::AccessSecret]
+					mask_keys: [Keys::ACCESS_KEY, Keys::ACCESS_SECRET]
 				)
 
 				s3_resource = Aws::S3::Resource.new(region: region, access_key_id: access_key, secret_access_key: access_secret)
@@ -82,49 +82,49 @@ module Fastlane
 			def self.available_options
 				[
 					FastlaneCore::ConfigItem.new(
-						key: Keys::AccessKey,
+						key: Keys::ACCESS_KEY,
 						env_name: 'S3_FIND_ACCESS_KEY',
 						description: 'AWS Access Key',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::AccessSecret,
+						key: Keys::ACCESS_SECRET,
 						env_name: 'S3_FIND_ACCESS_SECRET',
 						description: 'AWS Access Secret',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::Region,
+						key: Keys::REGION,
 						env_name: 'S3_FIND_REGION',
 						description: 'Name of the S3 region',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::Bucket,
+						key: Keys::BUCKET,
 						env_name: 'S3_FIND_BUCKET',
 						description: 'Name of the S3 bucket',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::Prefix,
+						key: Keys::PREFIX,
 						env_name: 'S3_FIND_PREFIX',
-						description: 'Prefix - folder path - to search in',
+						description: 'prefix - folder path - to search in',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::Filename,
+						key: Keys::FILENAME,
 						env_name: 'S3_FIND_FILENAME',
 						description: 'Name of the file to find',
 						is_string: true,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::Fail,
+						key: Keys::FAIL,
 						env_name: 'S3_FIND_FAIL',
 						description: 'Should the action produce an error if no result is found',
 						type: Boolean,
