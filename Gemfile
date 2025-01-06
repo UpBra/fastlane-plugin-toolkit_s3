@@ -20,6 +20,12 @@ gem 'rubocop-performance'
 gem 'rubocop-require_tools'
 # SimpleCov is a code coverage analysis tool for Ruby.
 gem 'simplecov'
+# abbrev, logger, mutex_m, ostruct // no longer in standard library
+gem 'abbrev'
+gem 'logger'
+gem 'mutex_m'
+gem 'ostruct'
+
 
 gemspec
 
