@@ -1,11 +1,13 @@
 # -------------------------------------------------------------------------
 #
 # S3 Web
-# Deploys a folder to S3.
+# Deploys a web folder to S3.
 #
 # -------------------------------------------------------------------------
 
 require 'aws-sdk-s3'
+require 'fastlane/action'
+require_relative '../helper/toolkit_s3_helper'
 
 module Fastlane
 
@@ -17,26 +19,22 @@ module Fastlane
 
 		class S3WebAction < Action
 
-			def self.run(params)
-				aws_key = params[:access_key]
-				aws_secret = params[:access_secret]
-				region = params[:region]
-				bucket = params[:bucket]
-				folder_path = params[:folder]
-				verbose = params[:verbose]
-				thread_count = params[:threads]
-				dry_run = params[:dry_run]
+			Helper = Fastlane::Helper::ToolkitS3Helper
 
-				UI.user_error! "#{self.name}: Missing AWS Access Key" if aws_key.nil? || aws_key.empty?
-				UI.user_error! "#{self.name}: Missing AWS Access Secret" if aws_secret.nil?
-				UI.user_error! "#{self.name}: Missing Region" if region.nil?
-				UI.user_error! "#{self.name}: Missing Bucket" if bucket.nil?
-				UI.user_error! "#{self.name}: Missing Folder" if folder_path.nil?
+			def self.run(params)
+				aws_key = params[Helper::Keys::ACCESS_KEY]
+				aws_secret = params[Helper::Keys::ACCESS_SECRET]
+				region = params[Helper::Keys::REGION]
+				bucket = params[Helper::Keys::BUCKET]
+				folder_path = params[Helper::Keys::FOLDER]
+				thread_count = params[Helper::Keys::THREADS]
+				dry_run = params[Helper::Keys::DRY_RUN]
+				clean = params[Helper::Keys::CLEAN]
 
 				FastlaneCore::PrintTable.print_values(
 					config: params,
 					title: "Summary for s3_web",
-					mask_keys: [:access_key, :access_secret]
+					mask_keys: [Helper::Keys::ACCESS_KEY, Helper::Keys::ACCESS_SECRET]
 				)
 
 				files = Dir.glob("#{folder_path}/**/*")
@@ -47,60 +45,49 @@ module Fastlane
 				mutex = Mutex.new
 				threads = []
 
-				UI.message "Removing files on #{bucket}..." if verbose
-				s3_bucket.objects.batch_delete! unless dry_run
-				UI.message "#{bucket} cleared." if verbose
+				if clean
+					Helper.message("Removing files on #{bucket}...")
+					s3_bucket.objects.batch_delete! unless dry_run
+					Helper.message("#{bucket} cleared.")
+				end
 
-				UI.message "Total files: #{total_files}" if verbose
-				UI.message "Thread Count: #{thread_count}" if verbose
+				Helper.message("Total files: #{total_files}")
+				Helper.message("Thread Count: #{thread_count}")
 
 				thread_count.times do |i|
-					threads[i] = Thread.new {
+					threads[i] = Thread.new do
 						until files.empty?
+							file = nil
 
-						mutex.synchronize do
-							file_number += 1
-							Thread.current['file_number'] = file_number
-						end
+							mutex.synchronize do
+								file = files.pop
+								file_number += 1
+								Thread.current['file_number'] = file_number
+							end
 
-						file = files.pop rescue nil
 							next unless file
 
-							path = file.sub(/^#{folder_path}\//, '')
+							path = file.sub(%r{^#{folder_path}/}, '')
 							data = File.open(file)
 
 							unless File.directory?(data)
 								obj = s3_bucket.object(path)
-								content_type = mime_type(file)
+								content_type = Helper.mime_type(file)
 
-								UI.message "[#{Thread.current["file_number"]}/#{total_files}] uploading #{path} #{content_type}" if verbose
+								UI.message("[#{Thread.current['file_number']}/#{total_files}] uploading #{path} #{content_type}")
 								obj.put({ acl: "public-read", body: data, content_type: content_type }) unless dry_run
 							end
 
 							data.close
 						end
-					}
+					end
 				end
 
-				threads.each { |t| t.join }
+				threads.each(&:join)
 
-				UI.message s3_bucket.url if verbose
+				Helper.message(s3_bucket.url)
 
 				lane_context[SharedValues::S3_WEB_PUBLIC_URL] = s3_bucket.url
-			end
-
-			def self.mime_type(file)
-				result = `file --brief --mime-type "#{file}"`.strip
-
-				case File.extname(file)
-				when '.css'
-					result = 'text/css'
-				when '.js'
-					result = 'text/javascript'
-				else
-				end
-
-				return result
 			end
 
 			#####################################################
@@ -114,59 +101,59 @@ module Fastlane
 			def self.available_options
 				[
 					FastlaneCore::ConfigItem.new(
-						key: :access_key,
+						key: Helper::Keys::ACCESS_KEY,
 						env_name: 'S3_WEB_ACCESS_KEY',
 						description: 'AWS Access Key',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :access_secret,
+						key: Helper::Keys::ACCESS_SECRET,
 						env_name: 'S3_WEB_ACCESS_SECRET',
 						description: 'AWS Access Secret',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :region,
+						key: Helper::Keys::REGION,
 						env_name: 'S3_WEB_REGION',
 						description: 'Name of the S3 bucket',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :bucket,
+						key: Helper::Keys::BUCKET,
 						env_name: 'S3_WEB_BUCKET',
 						description: 'Name of the S3 bucket',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :folder,
+						key: Helper::Keys::FOLDER,
 						env_name: 'S3_WEB_FOLDER',
 						description: 'The folder to upload',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :threads,
-						env_name: 'S3_WEB_THREADS',
-						description: 'Count of threads',
-						is_string: false,
-						default_value: 3
-					),
-					FastlaneCore::ConfigItem.new(
-						key: :verbose,
-						env_name: 'S3_WEB_VERBOSE',
-						description: 'Toggle verbose output',
-						is_string: false,
+						key: Helper::Keys::CLEAN,
+						env_name: 'S3_UPLOAD_CLEAN',
+						description: 'If the web folder action should clean the s3 bucket',
+						type: Boolean,
 						default_value: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: :dry_run,
+						key: Helper::Keys::THREADS,
+						env_name: 'S3_WEB_THREADS',
+						description: 'Count of threads',
+						type: Integer,
+						default_value: 3
+					),
+					FastlaneCore::ConfigItem.new(
+						key: Helper::Keys::DRY_RUN,
 						env_name: 'S3_WEB_DRY_RUN',
 						description: 'Toggle dry run',
-						is_string: false,
+						type: Boolean,
 						default_value: false
 					)
 				]

@@ -5,6 +5,9 @@
 #
 # -------------------------------------------------------------------------
 
+require 'aws-sdk-s3'
+require 'fastlane/action'
+require_relative '../helper/toolkit_s3_helper'
 
 module Fastlane
 
@@ -16,31 +19,21 @@ module Fastlane
 
 		class S3FindAction < Action
 
-			module Keys
-				ACCESS_KEY = :ACCESS_KEY
-				ACCESS_SECRET = :ACCESS_SECRET
-				REGION = :REGION
-				BUCKET = :BUCKET
-				PREFIX = :PREFIX
-				FILENAME = :FILENAME
-				FAIL = :FAIL
-			end
+			Helper = Fastlane::Helper::ToolkitS3Helper
 
 			def self.run(params)
-				require 'aws-sdk-s3'
-
-				access_key = require_property(params[Keys::ACCESS_KEY], 'Missing property :access_key')
-				access_secret = require_property(params[Keys::ACCESS_SECRET], 'Missing property :access_secret')
-				region = require_property(params[Keys::REGION], 'Missing property :region')
-				bucket = require_property(params[Keys::BUCKET], 'Missing property :bucket')
-				prefix = require_property(params[Keys::PREFIX], 'Missing property :prefix')
-				filename = require_property(params[Keys::FILENAME], 'Missing property :filename')
-				fail = params[Keys::FAIL]
+				access_key = params[Helper::Keys::ACCESS_KEY]
+				access_secret = params[Helper::Keys::ACCESS_SECRET]
+				region = params[Helper::Keys::REGION]
+				bucket = params[Helper::Keys::BUCKET]
+				prefix = params[Helper::Keys::PREFIX]
+				filename = params[Helper::Keys::FILENAME]
+				fail = params[Helper::Keys::FAIL]
 
 				FastlaneCore::PrintTable.print_values(
 					config: params,
 					title: "Summary for S3 Find",
-					mask_keys: [Keys::ACCESS_KEY, Keys::ACCESS_SECRET]
+					mask_keys: [Helper::Keys::ACCESS_KEY, Helper::Keys::ACCESS_SECRET]
 				)
 
 				s3_resource = Aws::S3::Resource.new(region: region, access_key_id: access_key, secret_access_key: access_secret)
@@ -57,14 +50,9 @@ module Fastlane
 				end
 
 				if (first = s3_filtered.first)
+					UI.success("Found file at #{first.public_url}")
 					lane_context[SharedValues::S3_FIND_PUBLIC_URL] = first.public_url
 				end
-			end
-
-			def self.require_property(arg, message)
-				UI.user_error!("#{display_name}: #{message}") if arg.nil? || arg.empty?
-
-				arg
 			end
 
 			#####################################################
@@ -72,7 +60,7 @@ module Fastlane
 			#####################################################
 
 			def self.display_name
-				's3_find'
+				"s3_find"
 			end
 
 			def self.description
@@ -82,49 +70,49 @@ module Fastlane
 			def self.available_options
 				[
 					FastlaneCore::ConfigItem.new(
-						key: Keys::ACCESS_KEY,
+						key: Helper::Keys::ACCESS_KEY,
 						env_name: 'S3_FIND_ACCESS_KEY',
 						description: 'AWS Access Key',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::ACCESS_SECRET,
+						key: Helper::Keys::ACCESS_SECRET,
 						env_name: 'S3_FIND_ACCESS_SECRET',
 						description: 'AWS Access Secret',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::REGION,
+						key: Helper::Keys::REGION,
 						env_name: 'S3_FIND_REGION',
 						description: 'Name of the S3 region',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::BUCKET,
+						key: Helper::Keys::BUCKET,
 						env_name: 'S3_FIND_BUCKET',
 						description: 'Name of the S3 bucket',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::PREFIX,
+						key: Helper::Keys::PREFIX,
 						env_name: 'S3_FIND_PREFIX',
 						description: 'prefix - folder path - to search in',
-						is_string: true,
+						type: String,
 						optional: true
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::FILENAME,
+						key: Helper::Keys::FILENAME,
 						env_name: 'S3_FIND_FILENAME',
 						description: 'Name of the file to find',
-						is_string: true,
-						optional: true
+						type: String,
+						optional: false
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Keys::FAIL,
+						key: Helper::Keys::FAIL,
 						env_name: 'S3_FIND_FAIL',
 						description: 'Should the action produce an error if no result is found',
 						type: Boolean,
