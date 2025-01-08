@@ -1,7 +1,3 @@
-lane :test do
-	toolkit_s3
-end
-
 lane :file do
 	s3_upload(
 		access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
