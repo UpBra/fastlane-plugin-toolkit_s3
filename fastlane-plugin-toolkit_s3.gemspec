@@ -5,7 +5,7 @@ require 'fastlane/plugin/toolkit_s3/version'
 Gem::Specification.new do |spec|
 	spec.name = 'fastlane-plugin-toolkit_s3'
 	spec.version = Fastlane::ToolkitS3::VERSION
-	spec.author = 'Blair Replogle'
+	spec.author = 'UpBra'
 	spec.email = 'UpBra@users.noreply.github.com'
 
 	spec.summary = 'a short summary'
@@ -17,8 +17,5 @@ Gem::Specification.new do |spec|
 	spec.metadata['rubygems_mfa_required'] = 'true'
 	spec.required_ruby_version = '>= 2.6'
 
-	# Don't add a dependency to fastlane or fastlane_re
-	# since this would cause a circular dependency
-
-	# spec.add_dependency 'your-dependency', '~> 1.0.0'
+	spec.add_dependency('aws-sdk-s3', '~> 1')
 end

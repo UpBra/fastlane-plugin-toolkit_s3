@@ -1,3 +1,42 @@
-lane :test do
-	toolkit_s3
+lane :file do
+	s3_upload(
+		access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
+		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+		region: ENV.fetch("REGION"),
+		bucket: ENV.fetch("BUCKET"),
+		file: ENV.fetch("IPA"),
+		path: "TESTING"
+	)
+end
+
+lane :folder do
+	s3_upload(
+		access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
+		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+		region: ENV.fetch("REGION"),
+		bucket: ENV.fetch("BUCKET"),
+		folder: "samples",
+		path: "TESTING"
+	)
+end
+
+lane :web do
+	s3_web(
+		access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
+		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+		region: ENV.fetch("REGION"),
+		bucket: ENV.fetch("BUCKET"),
+		folder: "samples",
+		clean: true
+	)
+end
+
+lane :find do
+	s3_find(
+		access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
+		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+		region: ENV.fetch("REGION"),
+		bucket: ENV.fetch("BUCKET"),
+		filename: "Phoenix.app.dSYM.zip"
+	)
 end
