@@ -64,7 +64,7 @@ module Fastlane
 			end
 
 			def self.description
-				"A short description with <= 80 characters of what this action does"
+				"Attempts to find a file with filename with a given bucket and path"
 			end
 
 			def self.available_options

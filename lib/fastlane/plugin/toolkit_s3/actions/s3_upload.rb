@@ -5,6 +5,7 @@
 #
 # -------------------------------------------------------------------------
 
+require 'aws-sdk-s3'
 require 'fastlane/action'
 require_relative '../helper/toolkit_s3_helper'
 
