@@ -15,7 +15,6 @@ module Fastlane
 		module SharedValues
 			S3_UPLOAD_PUBLIC_FILE_URL = :S3_UPLOAD_PUBLIC_FILE_URL
 			S3_UPLOAD_PUBLIC_FOLDER_URL = :S3_UPLOAD_PUBLIC_FOLDER_URL
-			S3_UPLOAD_PUBLIC_WEB_URL = :S3_UPLOAD_PUBLIC_WEB_URL
 		end
 
 		class S3UploadAction < Action
@@ -220,8 +219,7 @@ module Fastlane
 			def self.output
 				[
 					['S3_UPLOAD_PUBLIC_FILE_URL', 'The public url of the :file that was uploaded.'],
-					['S3_UPLOAD_PUBLIC_FOLDER_URL', 'The public url of the :folder that was uploaded.'],
-					['S3_UPLOAD_PUBLIC_WEB_URL', 'The public url of the bucket the :web_folder was synced to.']
+					['S3_UPLOAD_PUBLIC_FOLDER_URL', 'The public url of the :folder that was uploaded.']
 				]
 			end
 
@@ -230,7 +228,7 @@ module Fastlane
 			end
 
 			def self.authors
-				["WTA"]
+				["UpBra"]
 			end
 
 			def self.example_code
@@ -252,23 +250,6 @@ s3_publish(
 	bucket: "de-builds-staging",
 	folder: "path/to/folder",
 	path: "remote/path" # folder is copied into this path
-)',
-'# Sync web folder
-s3_publish(
-	access_key: "aws access key",
-	access_secret: "aws access secret",
-	region: "us-east-1",
-	bucket: "de-builds-staging",
-	web_folder: "web/build"
-)',
-'# Sync web folder with `private` ACL permissions.
-s3_publish(
-	access_key: "aws access key",
-	access_secret: "aws access secret",
-	region: "us-east-1",
-	bucket: "de-builds-staging",
-	acl: "private",
-	web_folder: "web/build"
 )'
 				]
 			end
