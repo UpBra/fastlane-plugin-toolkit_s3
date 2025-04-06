@@ -131,7 +131,7 @@ module Fastlane
 				end
 
 				public_url = s3_bucket.object("#{remote_path}/#{folder_name}").public_url
-				public_url = s3_bucket.object("#{remote_path}}").public_url if params[Helper::Keys::SYNC] == true
+				public_url = s3_bucket.object("#{remote_path}").public_url if params[Helper::Keys::SYNC] == true
 				Helper.success("Public URL: #{public_url}")
 
 				lane_context[SharedValues::S3_UPLOAD_PUBLIC_FOLDER_URL] = public_url
