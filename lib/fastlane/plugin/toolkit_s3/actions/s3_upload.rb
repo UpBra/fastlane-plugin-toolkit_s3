@@ -103,7 +103,7 @@ module Fastlane
 							next unless file
 
 							file_path = file.sub(%r{^#{folder}/}, "#{folder_name}/")
-							file_path = file.sub(%r{^#{folder_name}/}, "/") if params[Helper::Keys::SYNC] == true
+							file_path = file_path.sub(%r{^#{folder_name}/}, "/") if params[Helper::Keys::SYNC] == true
 							path = "#{remote_path}/#{file_path}"
 							data = File.open(file)
 
