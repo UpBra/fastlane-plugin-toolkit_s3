@@ -23,6 +23,7 @@ module Fastlane
 				PREFIX = :prefix
 				FILENAME = :filename
 				FAIL = :fail
+				SYNC = :sync
 			end
 
 			def self.message(message)

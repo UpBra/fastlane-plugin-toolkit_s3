@@ -31,6 +31,7 @@ module Fastlane
 
 				file_action(params) if params[Helper::Keys::FILE]
 				folder_action(params) if params[Helper::Keys::FOLDER]
+				# sync_action(params) if params[Helper::Keys::SYNC]
 			end
 
 			def self.file_action(params)
@@ -102,6 +103,7 @@ module Fastlane
 							next unless file
 
 							file_path = file.sub(%r{^#{folder}/}, "#{folder_name}/")
+							file_path = file.sub(%r{^#{folder_name}/}, "/") if params[Helper::Keys::SYNC] == true
 							path = "#{remote_path}/#{file_path}"
 							data = File.open(file)
 
@@ -128,6 +130,27 @@ module Fastlane
 				lane_context[SharedValues::S3_UPLOAD_PUBLIC_FOLDER_URL] = public_url
 
 				return true
+			end
+
+			def self.sync_action(params)
+				access_key = params[Helper::Keys::ACCESS_KEY]
+				access_secret = params[Helper::Keys::ACCESS_SECRET]
+				region = params[Helper::Keys::REGION]
+				bucket = params[Helper::Keys::BUCKET]
+				local_path = params[Helper::Keys::SYNC]
+				remote_path = params[Helper::Keys::PATH]
+				s3_connection = Aws::S3::Resource.new(region: region, access_key_id: access_key, secret_access_key: access_secret)
+
+				Dir.glob("#{local_path}/**/*").each do |file|
+					next if File.directory?(file)
+
+					s3_key = "#{remote_path}/#{file.sub("#{local_path}/", '')}"
+					obj = s3_connection.bucket(bucket).object(s3_key)
+
+					# Upload the file
+					obj.upload_file(file)
+					puts "Uploaded #{file} to s3://#{bucket}/#{s3_key}"
+				end
 			end
 
 			#####################################################
@@ -211,6 +234,13 @@ module Fastlane
 						key: Helper::Keys::DRY_RUN,
 						env_name: 'S3_UPLOAD_DRY_RUN',
 						description: 'Toggle dry run',
+						is_string: false,
+						default_value: false
+					),
+					FastlaneCore::ConfigItem.new(
+						key: Helper::Keys::SYNC,
+						env_name: 'S3_UPLOAD_SYNC',
+						description: 'Is folder action a sync?',
 						is_string: false,
 						default_value: false
 					)
