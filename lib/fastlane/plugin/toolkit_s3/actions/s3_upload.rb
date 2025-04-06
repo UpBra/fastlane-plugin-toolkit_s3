@@ -124,7 +124,14 @@ module Fastlane
 
 				threads.each(&:join)
 
-				Helper.success("Uploaded #{folder} to S3 #{bucket}")
+				if params[Helper::Keys::SYNC] == true
+					Helper.success("Synced #{folder} with remote folder #{remote_path}")
+				else
+					Helper.success("Uploaded #{folder} to S3 #{bucket}")
+				end
+
+				public_url = s3_bucket.object("#{remote_path}/#{folder_name}").public_url
+				public_url = s3_bucket.object("#{remote_path}}").public_url if params[Helper::Keys::SYNC] == true
 				Helper.success("Public URL: #{public_url}")
 
 				lane_context[SharedValues::S3_UPLOAD_PUBLIC_FOLDER_URL] = public_url
