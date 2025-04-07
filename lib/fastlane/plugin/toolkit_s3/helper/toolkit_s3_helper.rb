@@ -23,6 +23,7 @@ module Fastlane
 				PREFIX = :prefix
 				FILENAME = :filename
 				FAIL = :fail
+				LOCAL = :local
 				REMOTE = :remote
 			end
 

@@ -14,7 +14,7 @@ module Fastlane
 	module Actions
 
 		module SharedValues
-			S3_SYNC_FOLDER_URL = :S3_SYNC_PUBLIC_FOLDER_URL
+			S3_SYNC_REMOTE_URL = :S3_SYNC_REMOTE_URL
 		end
 
 		class S3SyncAction < Action
@@ -28,7 +28,7 @@ module Fastlane
 					mask_keys: [Helper::Keys::ACCESS_KEY, Helper::Keys::ACCESS_SECRET]
 				)
 
-				local_folder = File.expand_path(params[Helper::Keys::FOLDER])
+				local_folder = File.expand_path(params[Helper::Keys::LOCAL])
 				files = Dir.glob("#{local_folder}/**/*").select { |file| File.file?(file) }
 				moves = files.map { |file|
 					file_path = file.sub(local_folder, "")
@@ -94,8 +94,8 @@ module Fastlane
 						default_value: 'public-read'
 					),
 					FastlaneCore::ConfigItem.new(
-						key: Helper::Keys::FOLDER,
-						env_name: 'S3_SYNC_FOLDER',
+						key: Helper::Keys::LOCAL,
+						env_name: 'S3_SYNC_LOCAL',
 						description: 'The local folder to sync',
 						optional: true,
 						type: String
@@ -126,7 +126,7 @@ module Fastlane
 
 			def self.output
 				[
-					['S3_SYNC_FOLDER_URL', 'The public url of the remote folder that was synced']
+					['S3_SYNC_REMOTE_URL', 'The public url of the remote folder that was synced']
 				]
 			end
 
@@ -146,8 +146,8 @@ s3_sync(
 	access_secret: "aws access secret",
 	region: "us-east-1",
 	bucket: "bucket-name",
-	folder: "folder/to/sync",
-	path: "remote/folder/to/sync" # file is copied into this folder
+	local: "folder/to/sync",
+	remote: "remote/folder/to/sync" # file is copied into this folder
 )'
 				]
 			end
