@@ -31,7 +31,6 @@ module Fastlane
 
 				file_action(params) if params[Helper::Keys::FILE]
 				folder_action(params) if params[Helper::Keys::FOLDER]
-				# sync_action(params) if params[Helper::Keys::SYNC]
 			end
 
 			def self.file_action(params)
@@ -103,7 +102,6 @@ module Fastlane
 							next unless file
 
 							file_path = file.sub(%r{^#{folder}/}, "#{folder_name}/")
-							file_path = file_path.sub(%r{^#{folder_name}/}, "") if params[Helper::Keys::SYNC] == true
 							path = "#{remote_path}/#{file_path}".gsub("//", "/")
 							data = File.open(file)
 
@@ -124,14 +122,8 @@ module Fastlane
 
 				threads.each(&:join)
 
-				if params[Helper::Keys::SYNC] == true
-					Helper.success("Synced #{folder} with remote folder #{remote_path}")
-				else
-					Helper.success("Uploaded #{folder} to S3 #{bucket}")
-				end
-
 				public_url = s3_bucket.object("#{remote_path}/#{folder_name}").public_url
-				public_url = s3_bucket.object("#{remote_path}").public_url if params[Helper::Keys::SYNC] == true
+				Helper.success("Uploaded #{folder} to S3 #{bucket}")
 				Helper.success("Public URL: #{public_url}")
 
 				lane_context[SharedValues::S3_UPLOAD_PUBLIC_FOLDER_URL] = public_url
