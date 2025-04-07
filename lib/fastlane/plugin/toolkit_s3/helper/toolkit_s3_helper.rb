@@ -62,7 +62,6 @@ module Fastlane
 				access_key = params[Keys::ACCESS_KEY]
 				access_secret = params[Keys::ACCESS_SECRET]
 				region = params[Keys::REGION]
-				bucket = params[Keys::BUCKET]
 				Aws::S3::Resource.new(region: region, access_key_id: access_key, secret_access_key: access_secret)
 			end
 

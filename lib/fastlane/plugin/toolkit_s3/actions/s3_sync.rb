@@ -30,11 +30,11 @@ module Fastlane
 
 				local_folder = File.expand_path(params[Helper::Keys::LOCAL])
 				files = Dir.glob("#{local_folder}/**/*").select { |file| File.file?(file) }
-				moves = files.map { |file|
+				moves = files.map do |file|
 					file_path = file.sub(local_folder, "")
 					remote_path = params[Helper::Keys::REMOTE] + file_path
 					Helper::Move.new(file, remote_path)
-				}
+				end
 
 				s3_bucket = Helper.transfer(moves, params)
 				public_url = s3_bucket.object(params[Helper::Keys::REMOTE]).public_url
