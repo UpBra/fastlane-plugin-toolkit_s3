@@ -47,8 +47,8 @@ lane :sync do
 		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY", "456"),
 		region: ENV.fetch("REGION", "us-east-1"),
 		bucket: ENV.fetch("BUCKET", "bucket"),
-		folder: "spec",
-		remote: "jesus",
+		local: "local-folder-name",
+		remote: "remote-folder-name",
 		dry_run: true
 	)
 end
