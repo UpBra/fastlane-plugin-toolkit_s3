@@ -40,3 +40,15 @@ lane :find do
 		filename: "Phoenix.app.dSYM.zip"
 	)
 end
+
+lane :sync do
+	s3_sync(
+		access_key: ENV.fetch("AWS_ACCESS_KEY_ID", "123"),
+		access_secret: ENV.fetch("AWS_SECRET_ACCESS_KEY", "456"),
+		region: ENV.fetch("REGION", "us-east-1"),
+		bucket: ENV.fetch("BUCKET", "bucket"),
+		local: "local-folder-name",
+		remote: "remote-folder-name",
+		dry_run: true
+	)
+end

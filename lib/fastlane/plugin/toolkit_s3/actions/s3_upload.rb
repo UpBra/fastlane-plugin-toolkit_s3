@@ -85,8 +85,6 @@ module Fastlane
 				Helper.message("Total files: #{total_files}")
 				Helper.message("Thread Count: #{thread_count}")
 
-				public_url = s3_bucket.object("#{remote_path}/#{folder_name}").public_url
-
 				thread_count.times do |i|
 					threads[i] = Thread.new do
 						until files.empty?
@@ -102,7 +100,7 @@ module Fastlane
 							next unless file
 
 							file_path = file.sub(%r{^#{folder}/}, "#{folder_name}/")
-							path = "#{remote_path}/#{file_path}"
+							path = "#{remote_path}/#{file_path}".gsub("//", "/")
 							data = File.open(file)
 
 							Helper.message("[#{Thread.current['file_number']}/#{total_files}] is a directory") if File.directory?(data)
@@ -122,6 +120,7 @@ module Fastlane
 
 				threads.each(&:join)
 
+				public_url = s3_bucket.object("#{remote_path}/#{folder_name}").public_url
 				Helper.success("Uploaded #{folder} to S3 #{bucket}")
 				Helper.success("Public URL: #{public_url}")
 
