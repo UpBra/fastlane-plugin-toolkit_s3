@@ -41,7 +41,7 @@ module Fastlane
 
 				Helper.success("Public URL: #{public_url}")
 
-				lane_context[SharedValues::S3_SYNC_FOLDER_URL] = public_url
+				lane_context[SharedValues::S3_SYNC_REMOTE_URL] = public_url
 			end
 
 			#####################################################
